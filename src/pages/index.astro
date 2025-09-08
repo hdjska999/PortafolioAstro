@@ -1,0 +1,862 @@
+
+<!--
+  Portafolio Personal 
+  Este archivo contiene todo el código para la página principal del portafolio
+-->
+<html lang="es">
+	<head>
+		<!-- Meta tags para SEO y configuración de la página -->
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Karla Sofía Álvarez Gutierrez | Portafolio</title>
+		<!-- Favicon del sitio -->
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<!-- Google Fonts - Montserrat -->
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+		<style>
+			/**
+			 * ESTILOS GLOBALES
+			 * Configuración base para todo el sitio
+			 */
+			
+			/* Estilos generales para todo el documento */
+			* {
+				box-sizing: border-box;             /* Modelo de caja más predecible */
+			}
+			
+			/* Asegura fondo negro en toda la página */
+			html, body {
+				background-color: #000;             /* Fondo negro para evitar destellos blancos */
+			}
+			
+			/* Contenedor principal para todo el contenido */
+			html {
+				height: 100%;                       /* Asegura que el HTML ocupe toda la altura disponible */
+				overflow: hidden;                   /* Evita scrollbars duplicados */
+			}
+			
+			/* Cuerpo del documento con scroll */
+			body {
+				color: #fff;                        /* Color de texto principal */
+				font-family: 'Montserrat', Arial, sans-serif;
+				margin: 0;
+				height: 100%;                       /* Ocupa toda la altura disponible */
+				perspective: 1px;                   /* Crea efecto 3D para parallax */
+				transform-style: preserve-3d;       /* Mantiene el efecto 3D para los hijos */
+				overflow-x: hidden;                 /* Evita barras de desplazamiento horizontal */
+				overflow-y: auto;                   /* Permite scroll vertical */
+				scroll-behavior: smooth;            /* Suaviza el desplazamiento al hacer click en enlaces internos */
+			}
+			
+			/* Capa de fondo con efecto parallax */
+			.parallax-bg {
+				position: absolute;                 /* Posicionamiento absoluto */
+				top: 0;
+				left: 0;
+				right: 0;
+				bottom: 0;
+				width: 110%;
+				height: 400%;                       /* Mayor altura para el efecto de parallax */
+				background: url('/images/4798ec9d410041eb81d8718d27e81599.jpg') no-repeat center center;
+				background-size: cover;             /* Cubre todo el espacio disponible */
+				transform: translateZ(-1px) scale(2); /* Efecto parallax */
+				z-index: -2;                        /* Detrás de todo el contenido */
+			}
+			
+			/* Overlay oscuro para mejorar la legibilidad del texto sobre la imagen de fondo */
+			.overlay {
+				position: absolute;                 /* Posicionamiento absoluto */
+				top: 0;
+				left: 0;
+				width: 120%;
+				height: 400%;                       /* Misma altura que el fondo */
+				background: rgba(0, 0, 0, 0.733);   /* Color negro con 73.3% de opacidad */
+				z-index: -1;                        /* Delante del fondo pero detrás del contenido */
+				backdrop-filter: blur(1px);         /* Aplica un ligero desenfoque para suavizar píxeles */
+				transform: translateZ(-0.9px) scale(1.9); /* Casi al mismo nivel que el fondo */
+			}
+			
+			/* Asegurarse de que el color base del fondo sea negro sin ocultar el parallax */
+			body::after {
+				content: '';
+				position: fixed;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				background-color: #000;
+				z-index: -10; /* Valor más bajo para estar detrás de todo */
+			}
+			
+			/* Contenedor de contenido principal */
+			.content {
+				position: relative;                 /* Posicionamiento relativo */
+				z-index: 1;                         /* Por encima del fondo y overlay */
+				transform-style: preserve-3d;       /* Mantiene el efecto 3D */
+			}
+			
+			/**
+			 * EFECTOS DE ANIMACIÓN
+			 * Estilos para las animaciones de scroll y partículas
+			 */
+			
+			/* Animación para secciones - estado inicial */
+			.section-animated {
+				transition: transform 0.8s ease, opacity 0.8s ease;   /* Transición suave de 0.8s para movimiento y opacidad */
+				opacity: 0;                                           /* Comienza invisible */
+				transform: translateY(50px) rotate(-3deg);            /* Desplazado hacia abajo y rotado ligeramente */
+			}
+			
+			/* Asegurar que las animaciones no afecten la impresión */
+			@media print {
+				.section-animated {
+					opacity: 1 !important;                             /* Siempre visible al imprimir */
+					transform: none !important;                         /* Sin transformaciones */
+					transition: none !important;                        /* Sin transiciones */
+				}
+			}
+			
+			/* Estado visible de las secciones cuando entran en viewport */
+			.section-animated.visible {
+				opacity: 1;                                           /* Completamente visible */
+				transform: translateY(0) rotate(0);                   /* Posición y rotación normal */
+			}
+			
+			/* Contenedor para las partículas decorativas */
+			.particles-container {
+				position: absolute;                                   /* Posicionamiento absoluto para no afectar el layout */
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100vh;                                        /* Cubre toda la altura de la ventana */
+				overflow: hidden;                                     /* Oculta partículas que salgan del área */
+				z-index: -1;                                          /* Colocado detrás del contenido */
+				pointer-events: none;                                 /* Permite clicks a través de las partículas */
+			}
+			
+			/* Estilo para las partículas decorativas */
+			.particle {
+				position: absolute;                                   /* Posición absoluta dentro del contenedor */
+				border-radius: 50%;                                   /* Forma circular */
+				opacity: 0.7;                                         /* Semi-transparente */
+				box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.3);    /* Brillo alrededor de cada partícula */
+			}
+			
+			/* Definición de la animación para las partículas */
+			@keyframes float {
+				0% {
+					transform: translate(0, 0) rotate(0);             /* Posición inicial */
+				}
+				25% {
+					transform: translate(10px, 15px) rotate(5deg);    /* Primer punto de la trayectoria */
+				}
+				50% {
+					transform: translate(-5px, 10px) rotate(-5deg);   /* Segundo punto de la trayectoria */
+				}
+				75% {
+					transform: translate(-15px, -5px) rotate(3deg);   /* Tercer punto de la trayectoria */
+				}
+				100% {
+					transform: translate(0, 0) rotate(0);             /* Regresa a la posición inicial */
+				}
+			}
+			/**
+			 * ESTILOS DE NAVEGACIÓN
+			 * Encabezado y menú de navegación
+			 */
+			
+			/* Barra de navegación superior */
+			header {
+				display: flex;                                        /* Flexbox para alinear logo y enlaces */
+				justify-content: space-between;                       /* Logo a la izquierda, navegación a la derecha */
+				align-items: center;                                  /* Centra los elementos verticalmente */
+				padding: 2rem 3rem 1rem 3rem;                         /* Espacio interior: arriba derecha abajo izquierda */
+			}
+			
+			/* Estilo del logotipo o nombre de usuario */
+			.logo {
+				font-size: 2rem;                                      /* Tamaño grande para el logo */
+				font-weight: bold;                                    /* Texto en negrita */
+				color: #eaff00;                                       /* Color verde turquesa */
+				letter-spacing: 2px;                                  /* Espaciado entre letras */
+			}
+			
+			/* Enlaces de navegación */
+			nav a {
+				color: #fff;                                          /* Color blanco para el texto */
+				text-decoration: none;                                /* Sin subrayado */
+				margin-left: 2rem;                                    /* Espacio entre enlaces */
+				font-size: 1.1rem;                                    /* Tamaño de fuente */
+				transition: color 0.2s;                               /* Animación suave al cambiar color */
+			}
+			
+			/* Efecto hover para los enlaces */
+			nav a:hover {
+				color: #0459bb;                                       /* Cambia al color azul al pasar el cursor */
+			}
+			
+			/* Estilo especial para el enlace del CV */
+			nav a:first-child {
+				font-weight: 600;                                     /* Un poco más gruesa */
+				padding: 5px 12px;                                    /* Padding para hacerlo más destacado */
+				background-color: rgba(4, 89, 187, 0.15);              /* Fondo azul semi-transparente */
+				border-radius: 4px;                                   /* Bordes redondeados */
+				transition: all 0.3s ease;                            /* Transición suave */
+				margin-right: 0.5rem;                                 /* Separa un poco del siguiente enlace */
+			}
+			
+			/* Efecto hover para el enlace del CV */
+			nav a:first-child:hover {
+				background-color: #0459bb;                             /* Fondo azul sólido */
+				color: white;                                         /* Texto blanco */
+				transform: translateY(-2px);                          /* Pequeño efecto de elevación */
+				box-shadow: 0 3px 8px rgba(4, 89, 187, 0.4);          /* Sombra sutil */
+			}
+			/**
+			 * SECCIÓN HERO 
+			 * Sección principal con presentación personal
+			 */
+			
+			/* Contenedor principal para la sección de presentación */
+			.hero {
+				display: flex;                                        /* Flexbox para dividir en dos columnas */
+				justify-content: space-between;                       /* Espacio entre columnas */
+				align-items: center;                                  /* Alineación vertical al centro */
+				padding: 4rem 3rem 2rem 3rem;                         /* Espacio interior: arriba derecha abajo izquierda */
+				position: relative;                                   /* Para posicionar elementos internos */
+				flex-wrap: wrap;                                      /* Permite ajustar en dispositivos móviles */
+			}
+			
+			/* Ajustes específicos para la sección hero en PDF */
+			@media print {
+				.hero {
+					padding: 1rem 1.5rem !important;                   /* Menos espacio en blanco */
+					min-height: auto !important;                       /* Altura automática */
+				}
+				
+				.hero-image {
+					width: 150px !important;                           /* Imagen más pequeña */
+					height: 150px !important;                          /* Imagen más pequeña */
+				}
+			}
+			
+			/* Contenedor para el texto del hero (lado izquierdo) */
+			.hero-text {
+				flex: 1;                                              /* Toma el espacio disponible */
+				min-width: 300px;                                     /* Ancho mínimo para evitar compresión excesiva */
+				padding-right: 2rem;                                  /* Espacio entre texto y foto */
+				text-align: left;                                     /* Alineación del texto a la izquierda */
+			}
+			
+			/* Contenedor para la foto de perfil (lado derecho) */
+			.hero-image {
+				flex: 0 0 auto;                                       /* No crecer ni encogerse */
+				width: 300px;                                         /* Ancho fijo de la foto */
+				height: 300px;                                        /* Altura fija de la foto */
+				margin: auto;                                       /* Centrado cuando está en móvil */
+				position: relative;                                   /* Para efectos decorativos */
+			}
+			
+			/* Animación para el brillo pulsante del borde */
+			@keyframes pulse-glow {
+				0% {
+					box-shadow: 0 0 8px 2px rgba(99, 153, 206, 0.2);
+					border-color: transparent;
+				}
+				50% {
+					box-shadow: 0 0 20px 6px rgba(99, 153, 206, 0.2);
+					border-color: transparent;
+				}
+				100% {
+					box-shadow: 0 0 10px 2px rgba(99, 153, 206, 0.2);
+					border-color: transparent;
+				}
+			}
+			
+			/* Contenedor para efecto de borde animado */
+			.hero-image::before {
+				content: '';
+				position: absolute;
+				top: -10px;
+				left: -10px;
+				right: -10px;
+				bottom: -10px;
+				border-radius: 50%;
+				background: rgba(58, 210, 159, 0.15);
+				z-index: -1;
+				animation: pulse-glow 3s ease-in-out infinite;
+				filter: blur(5px);
+			}
+			
+			/* Estilo para la foto de perfil */
+			.profile-image {
+				width: 100%;                                          /* Ocupa todo el ancho del contenedor */
+				height: 100%;                                         /* Ocupa toda la altura del contenedor */
+				border-radius: 50%;                                   /* Forma circular */
+				object-fit: cover;                                    /* Recorta la imagen para encajar */
+				border: 4px solid #3ad29f;                            /* Borde color azul */
+				position: relative;                                   /* Para posicionamiento de elementos */
+				z-index: 1;                                           /* Por encima del pseudo-elemento */
+				animation: pulse-glow 3s ease-in-out infinite;        /* Animación de brillo pulsante */
+			}
+			
+			/* Estilo para los títulos principales H1 */
+			.hero h1 {
+				font-size: 3rem;                                      /* Tamaño grande para destacar */
+				font-weight: 700;                                     /* Negrita para mayor impacto */
+				margin-bottom: 0.5rem;                                /* Espacio inferior */
+			}
+			
+			/* Estilo para el nombre (H2) */
+			.hero h2 {
+				font-size: 2.2rem;                                    /* Tamaño medio-grande */
+				color: #5e88b2;                                       /* Color azul para destacar */
+				margin-bottom: 0.5rem;                                /* Espacio inferior */
+			}
+			
+			/* Estilo para el párrafo de descripción */
+			.hero p {
+				font-size: 1.2rem;                                    /* Tamaño legible */
+				color: #ccc;                                          /* Gris claro para contraste suave */
+				margin-bottom: 2rem;                                  /* Espacio antes del botón */
+			}
+			
+			/* Botón de llamada a la acción (CTA) */
+			.cta-btn {
+				background: none;                                     /* Fondo transparente */
+				border: 2px solid #5e88b2;                            /* Borde turquesa */
+				color: #5e88b2;                                       /* Texto turquesa */
+				padding: 0.7rem 2rem;                                 /* Espacio interior */
+				font-size: 1.1rem;                                    /* Tamaño de texto */
+				border-radius: 5px;                                   /* Bordes redondeados */
+				cursor: pointer;                                      /* Cambio del cursor al puntero */
+				transition: background 0.2s, color 0.2s;              /* Animación suave */
+			}
+			
+			/* Efecto al pasar el cursor por el botón */
+			.cta-btn:hover {
+				background: #5e88b2;                                  /* Fondo turquesa */
+				color: #181818;                                       /* Texto casi negro para contraste */
+			}
+			/**
+			 * SECCIÓN DE HABILIDADES Y SECCIONES GENERALES
+			 * Estilos para la sección de skills y estructura común de secciones
+			 */
+			
+			/* Contenedor para la sección de habilidades */
+			.skills {
+				padding: 2rem 3rem;                                   /* Espacio interior uniforme */
+			}
+			
+			/* Título de la sección de habilidades */
+			.skills-title {
+				color: #3ad29f;                                       /* Color turquesa para destacar */
+				font-size: 1.5rem;                                    /* Tamaño medio */
+				margin-bottom: 1rem;                                  /* Espacio después del título */
+			}
+			
+			/* Contenedor flexible para las etiquetas de habilidades */
+			.skills-list {
+				display: flex;                                        /* Layout flexible */
+				flex-wrap: wrap;                                      /* Permite envolver a nueva línea */
+				gap: 1.2rem;                                          /* Espacio entre etiquetas */
+				font-size: 1.1rem;                                    /* Tamaño de texto */
+			}
+			
+			/* Etiquetas individuales de habilidades */
+			.skills-list span {
+				background: #232323;                                  /* Fondo gris oscuro */
+				color: #ffffff;                                       /* Texto turquesa */
+				padding: 0.5rem 1rem;                                 /* Espacio interior */
+				border-radius: 20px;                                  /* Bordes muy redondeados (píldoras) */
+			}
+			
+			/* Estilo común para todas las secciones */
+			.section {
+				padding: 2rem 3rem;                                   /* Espaciado interior uniforme */
+			}
+			
+			/* Título para cada sección */
+			.section-title {
+				font-size: 1.3rem;                                    /* Tamaño medio */
+				color: #3ad29f;                                       /* Color turquesa para destacar */
+				margin-bottom: 1rem;                                  /* Espacio después del título */
+			}
+			/**
+			 * SECCIÓN DE PROYECTOS 
+			 * Estilos para mostrar proyectos en tarjetas
+			 */
+			
+			/* Contenedor flexible para las tarjetas de proyectos */
+			.projects {
+				display: flex;                                        /* Layout flexible */
+				flex-wrap: wrap;                                      /* Permite múltiples líneas */
+				gap: 2rem;                                            /* Espacio entre tarjetas */
+			}
+			
+			/* Tarjeta individual de proyecto - Efecto de vidrio (glassmorphism) */
+			.project-card {
+				background: rgba(35, 35, 35, 0.8);                    /* Fondo semi-transparente */
+				backdrop-filter: blur(5px);                           /* Efecto de desenfoque detrás (navegadores modernos) */
+				-webkit-backdrop-filter: blur(5px);                   /* Para Safari */
+				border-radius: 10px;                                  /* Bordes redondeados */
+				padding: 1.5rem;                                      /* Espaciado interior */
+				width: 300px;                                         /* Ancho fijo */
+				color: #fff;                                          /* Texto blanco */
+				box-shadow: 0 2px 8px rgba(0,0,0,0.4);                /* Sombra para profundidad */
+				border: 1px solid rgba(255, 255, 255, 0.1);           /* Borde sutil */
+			}
+			
+			/* Ajustes para tarjetas de proyectos en impresión */
+			@media print {
+				.project-card {
+					padding: 0.75rem !important;                      /* Menos padding */
+					width: 48% !important;                            /* Ancho reducido */
+					background: #1a1a1a !important;                    /* Fondo sólido */
+					box-shadow: none !important;                       /* Sin sombras */
+					backdrop-filter: none !important;                  /* Sin filtros */
+					-webkit-backdrop-filter: none !important;          /* Sin filtros */
+					break-inside: avoid;                              /* Evita cortar las tarjetas */
+					font-size: 0.9rem !important;                     /* Texto más pequeño */
+				}
+				
+				.projects {
+					gap: 1rem !important;                             /* Menos espacio entre tarjetas */
+				}
+			}
+			
+			/**
+			 * SECCIÓN DE CONTACTO
+			 * Estilos para la sección final con información de contacto
+			 */
+			
+			/**
+			 * SECCIÓN DE CERTIFICADOS
+			 * Estilo para mostrar certificados en un formato atractivo
+			 */
+			
+			/* Contenedor para los certificados */
+			.certificates-container {
+				display: flex;                                        /* Layout flexible */
+				flex-wrap: wrap;                                      /* Permite múltiples líneas */
+				gap: 1.5rem;                                          /* Espacio entre certificados */
+				margin-top: 1rem;                                     /* Espacio superior */
+			}
+			
+			/* Estilo para cada certificado individual */
+			.certificate-item {
+				background: rgba(35, 35, 35, 0.7);                    /* Fondo semi-transparente */
+				border-radius: 8px;                                   /* Bordes redondeados */
+				overflow: hidden;                                     /* Contiene la imagen */
+				width: 300px;                                         /* Ancho fijo más grande */
+				height: auto;                                         /* Altura automática según contenido */
+				box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);            /* Sombra sutil */
+				border: 1px solid rgba(255, 255, 255, 0.1);           /* Borde tenue */
+				transition: transform 0.3s ease, box-shadow 0.3s ease; /* Animación al pasar el cursor */
+				padding: 0;                                           /* Sin relleno interno */
+			}
+			
+			/* Estilo específico para las imágenes dentro de los certificados */
+			.certificate-item img {
+				width: 100%;                                          /* Ancho completo del contenedor */
+				height: auto;                                         /* Altura proporcional */
+				display: block;                                       /* Elimina espacios extra */
+				object-fit: contain;                                  /* Mantiene proporción sin recortar */
+			}
+			
+			/* Efecto hover para certificados */
+			.certificate-item:hover {
+				transform: translateY(-5px);                          /* Se eleva ligeramente */
+				box-shadow: 0 5px 15px rgba(58, 210, 159, 0.3);       /* Sombra turquesa */
+			}
+			
+			/* Contenedor de la sección de contacto */
+			.contact {
+				text-align: center;                                   /* Centrado horizontal */
+				padding: 3rem 3rem 2rem 3rem;                         /* Espacio interior */
+			}
+			
+			/* Contenedor de botones sociales */
+			.social-buttons {
+				display: flex;                                        /* Layout flexible */
+				justify-content: center;                              /* Centrado horizontal */
+				gap: 2.5rem;                                          /* Mayor espacio entre botones */
+				margin-top: 1.5rem;                                   /* Espacio superior */
+				flex-wrap: wrap;                                      /* Permite envolver en móviles */
+			}
+			
+			/* Enlaces de redes sociales */
+			.social-link {
+				text-decoration: none;                               /* Sin subrayado */
+				color: inherit;                                      /* Hereda color del texto */
+			}
+			
+			/* Botones de redes sociales con íconos */
+			.social-btn {
+				background: none;                                     /* Sin fondo */
+				border: 2px solid #5e88b2;                            /* Borde turquesa */
+				color: #3ad29f;                                       /* Color turquesa para los iconos */
+				width: 60px;                                          /* Ancho fijo */
+				height: 60px;                                         /* Altura fija (forma circular) */
+				border-radius: 50%;                                   /* Forma circular */
+				display: flex;                                        /* Flexbox para centrar icono */
+				justify-content: center;                              /* Centrado horizontal */
+				align-items: center;                                  /* Centrado vertical */
+				cursor: pointer;                                      /* Cursor de mano al pasar */
+				transition: all 0.3s ease;                            /* Transición suave para todos los cambios */
+				padding: 0;                                           /* Sin relleno interno */
+				position: relative;                                   /* Para posicionar elementos */
+				overflow: hidden;                                     /* Oculta cualquier desbordamiento */
+			}
+			
+			/* Efecto hover para botones de redes sociales */
+			.social-btn:hover {
+				background: #5e88b2;                                  /* Fondo turquesa al pasar el cursor */
+				color: #181818;                                       /* Color oscuro para los iconos */
+				transform: translateY(-5px);                          /* Elevación al pasar el cursor */
+				box-shadow: 0 5px 15px rgba(58, 210, 159, 0.6);       /* Sombra al pasar el cursor */
+			}
+			
+			/* Estilo para SVGs dentro de los botones */
+			.social-btn svg {
+				width: 24px;                                          /* Ancho del icono */
+				height: 24px;                                         /* Altura del icono */
+				transition: transform 0.3s ease;                       /* Animación para el icono */
+			}
+			
+			/* Efecto hover para los SVGs */
+			.social-btn:hover svg {
+				transform: scale(1.15);                               /* Icono ligeramente más grande al pasar el cursor */
+			}
+			
+			/* Pie de página */
+			footer {
+				text-align: center;                                   /* Centrado horizontal */
+				color: #888;                                          /* Gris para ser sutil */
+				padding: 1rem 0;                                      /* Espacio interior vertical */
+				font-size: 0.9rem;                                    /* Texto pequeño */
+			}
+			
+			/**
+			 * ESTILOS PARA IMPRESIÓN Y PDF
+			 * Optimiza el formato al imprimir o exportar a PDF
+			 */
+			@media print {
+				/* Ajustes generales para impresión */
+				@page {
+					margin: 0.5cm;                                    /* Márgenes mínimos para impresión */
+					size: auto;                                        /* Usa el tamaño de página predeterminado */
+				}
+				
+				html, body {
+					margin: 0;                                         /* Elimina márgenes */
+					padding: 0;                                         /* Elimina padding */
+					width: 100%;                                        /* Ancho completo */
+					height: auto;                                       /* Altura automática */
+					overflow: visible;                                  /* Permite todo el contenido */
+				}
+				
+				/* Oculta elementos innecesarios para impresión */
+				.particles-container, .parallax-bg, .overlay {
+					display: none;                                      /* No mostrar en PDF */
+				}
+				
+				/* Ajustar contenido para caber mejor */
+				.content {
+					transform: none !important;                         /* Elimina transformaciones 3D */
+					width: 100%;                                        /* Ancho completo */
+					padding: 0;                                         /* Sin padding */
+				}
+				
+				/* Ajustar tamaños de secciones */
+				header, .hero, section, footer {
+					padding: 1rem 1.5rem !important;                    /* Padding reducido */
+					page-break-inside: avoid;                           /* Evita cortes de página en medio de secciones */
+				}
+				
+				/* Ajustar tamaño de textos */
+				h1 { font-size: 1.8rem !important; }                    /* Títulos más pequeños */
+				h2 { font-size: 1.5rem !important; }                    /* Subtítulos más pequeños */
+				p, li, span { font-size: 0.9rem !important; }           /* Texto más pequeño */
+				
+				/* Ajustar fondo y colores */
+				body {
+					background: #000 !important;                        /* Fondo negro */
+					color: #fff !important;                             /* Texto blanco */
+				}
+			}
+		</style>
+	</head>
+	<!-- 
+		ESTRUCTURA DEL DOCUMENTO 
+		A continuación se define la estructura HTML del portafolio
+	-->
+	<body>
+		<!-- Fondo con efecto parallax -->
+		<div class="parallax-bg"></div>
+		<div class="overlay"></div>
+		
+		<!-- Contenedor principal de todo el contenido -->
+		<div class="content">
+		<!-- 
+			CABECERA DE NAVEGACIÓN
+			Contiene el logo/nombre de usuario y los enlaces de navegación
+		-->
+		<header>
+			<div class="logo">Sofia Alvarez</div>
+			<nav>
+				<a href="https://astrocv-seven.vercel.app/" target="_blank">CV</a>
+				<a href="#about">About</a>
+				<a href="#projects">Projects</a>
+				<a href="#certificates">Certificados</a>
+				<a href="#contact">Contact</a>
+			</nav>
+		</header>
+		<!-- 
+			SECCIÓN HERO
+			Primera impresión y presentación personal
+		-->
+		<section class="hero">
+			<!-- Lado izquierdo - Información de presentación -->
+			<div class="hero-text">
+				<h1>Hola! Soy</h1>
+				<h2>@hdjska999</h2>
+				<h1>Front End & Web Developer</h1>
+				<p>Me interesa el desarrollo web y el diseño, igualmente cuento con conocimientos sólidos en programación y bases de datos. Soy creativa, organizada y me gustaría en el futuro enfocarme en la creación de videojuegos.</p>
+				<p>Encuentra mi CV arriba!</p>
+				<a href="#contact"><button class="cta-btn">¡Contáctame!</button></a>
+			</div>
+			
+			<!-- Lado derecho - Foto de perfil circular -->
+			<div class="hero-image">
+				<img src="public/images/182820858.jpeg" alt="Mi foto de perfil" class="profile-image" />
+			</div>
+		</section>
+		<!-- 
+			SECCIÓN DE HABILIDADES
+			Muestra las tecnologías y herramientas que dominas
+		-->
+		<section class="skills" id="about">
+			<div class="skills-title">Habilidades y herramientas</div>
+			<div class="skills-list">
+				<span>React</span>
+				<span>HTML</span>
+				<span>CSS</span>
+				<span>JavaScript</span>
+				<span>Java</span>
+				<span>Python</span>
+				<span>MySQL</span>
+				<span>Power BI</span>
+				<span>Diseño creativo</span>
+				<span>Interfaces</span>
+			</div>
+			<div style="margin-top:1.5rem;color:#3ad29f;">Idiomas que hablo! -> <strong style="color:#fff;">Español (nativo), Inglés B2 (avanzado)</strong></div>
+		</section>
+		
+		<!-- 
+			SECCIÓN DE PROYECTOS
+			Muestra los proyectos en tarjetas de estilo glassmorphism
+		-->
+		<section class="section" id="projects">
+			<div class="section-title">Proyectos académicos</div>
+			<div class="projects">
+				<!-- Tarjeta de proyecto 1 -->
+				<div class="project-card">
+					<strong>Sistema de punto de venta</strong><br />
+					<span style="color:#3ad29f;">Java + MySQL</span><br />
+					Se desarrolló en equipo un sistema con base de datos propia para gestionar ventas e inventario.
+				</div>
+				
+				<!-- Tarjeta de proyecto 2 -->
+				<div class="project-card">
+					<strong>Aplicación y página web para consultorio dental</strong><br />
+					<span style="color:#3ad29f;">React + Visual Studio</span><br />
+					Permite agendar citas y gestionar pacientes para un consultorio dental. Me desempeñé en el frontend de la aplicación y la página web.
+				</div>
+			</div>
+		</section>
+		<!-- 
+			SECCIÓN DE EDUCACIÓN
+			Información sobre tu formación académica
+		-->
+		<section class="section">
+			<div class="section-title">Educación</div>
+			<div style="color:#fff;">Ingeniería en Sistemas Computacionales, Universidad Autónoma de Tamaulipas<br />2022 – Actualidad (5º semestre)</div>
+		</section>
+		
+		<!-- 
+			SECCIÓN DE CURSOS Y ACTIVIDADES
+			Lista de formación complementaria
+		-->
+		<section class="section">
+			<div class="section-title">Cursos y Actividades</div>
+			<ul style="color:#ccc;">
+				<li>Curso de gestión de proyectos con Trello</li>
+				<li>Introducción a HTML y JavaScript</li>
+				<li>Manejo de Power BI para análisis de datos</li>
+			</ul>
+		</section>
+		
+		<!-- 
+			SECCIÓN DE CERTIFICADOS
+			Espacio para mostrar los certificados obtenidos
+		-->
+		<section class="section" id="certificates">
+			<div class="section-title">¡Checa mis certificados!</div>
+			<div class="certificates-container">
+				<div class="certificate-item">
+					<img src="/images/certificado estructura de datos.png" alt="Certificado de Estructura de Datos" width="100%" />
+				</div>
+				<div class="certificate-item">
+					<img src="/images/certificado diseñador ux.png" alt="Certificado de Diseñador UX" width="100%" />
+				</div>	
+				<div class="certificate-item">
+					<img src="/images/certificado desarrollador interfaces graficas.png" alt="Certificado de Desarrollador de Interfaces Gráficas" width="100%" />
+				</div>
+				<div class="certificate-item">
+					<img src="public/images/certificado evaluador ux.png" alt="Certificado de Evaluador UX" width="100%" />
+				</div>	
+				<div class="certificate-item">
+					<img src="public/images/certificado cambridge ingles.png" alt="Certificado de Cambridge Inglés" width="100%" />
+				</div>
+				<!-- Más certificados aquí -->
+			</div>
+		</section>
+		
+		<!-- 
+			SECCIÓN DE CONTACTO
+			Información para que potenciales clientes/empleadores te contacten
+		-->
+		<section class="contact" id="contact">
+			<h2>¡Conéctate conmigo!</h2>
+			<div class="social-buttons">
+				<a href="https://github.com/hdjska999" target="_blank" class="social-link">
+					<div class="social-btn">
+						<!-- GitHub Logo SVG -->
+						<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+							<path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+						</svg>
+					</div>
+				</a>
+				<a href="https://instagram.com/hdjska999" target="_blank" class="social-link">
+					<div class="social-btn">
+						<!-- Instagram Logo SVG -->
+						<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+							<path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+						</svg>
+					</div>
+				</a>
+			</div>
+			<div style="margin-top:1.5rem;color:#ccc;">
+				Dirección: Tamaulipas, México<br />
+				Email: ks.alvarez.g@gmail.com
+			</div>
+		</section>
+		
+		<!-- 
+			PIE DE PÁGINA
+			Copyright y derechos de autor
+		-->
+		<footer>
+			&copy; 2025 Karla Sofía Álvarez Gutierrez. Todos los derechos reservados.
+		</footer>
+		
+		<!-- 
+			CONTENEDOR DE PARTÍCULAS
+			Este div contiene las partículas decorativas que se crean con JavaScript
+		-->
+		<div class="particles-container" id="particles-container"></div>
+		
+		<!-- 
+			SCRIPT PRINCIPAL
+			Este script maneja las animaciones y efectos visuales del sitio
+		-->
+		<script is:inline>
+			/**
+			 * Inicialización cuando el DOM está completamente cargado
+			 * Este evento se dispara cuando la estructura HTML está lista
+			 */
+			document.addEventListener('DOMContentLoaded', () => {
+				// Definición de colores para las partículas decorativas
+				const colors = ['#3ad29f', '#ff6b6b', '#4e54c8', '#ffd166', '#83C5BE'];
+				
+				// Obtener el contenedor donde se crearán las partículas
+				const particlesContainer = document.getElementById('particles-container');
+				
+				// Cantidad de partículas a generar
+				const particleCount = 50;
+				
+				/**
+				 * GENERACIÓN DE PARTÍCULAS
+				 * Crea elementos div para cada partícula y los configura con estilos aleatorios
+				 */
+				if (particlesContainer) {
+					for (let i = 0; i < particleCount; i++) {
+						// Crear un nuevo elemento div para cada partícula
+						const particle = document.createElement('div');
+						particle.classList.add('particle');
+						
+						// Asignar un tamaño aleatorio entre 5px y 15px
+						const size = Math.random() * 10 + 5;
+						particle.style.width = `${size}px`;
+						particle.style.height = `${size}px`;
+						
+						// Posicionar aleatoriamente en el contenedor (en porcentajes)
+						const xPos = Math.random() * 100;
+						const yPos = Math.random() * 100;
+						particle.style.left = `${xPos}%`;
+						particle.style.top = `${yPos}%`;
+						
+						// Asignar un color aleatorio de la paleta definida
+						const colorIndex = Math.floor(Math.random() * colors.length);
+						particle.style.backgroundColor = colors[colorIndex];
+						
+						// Aplicar la animación con duración aleatoria entre 5 y 15 segundos
+						particle.style.animation = `float ${5 + Math.random() * 10}s infinite`;
+						
+						// Añadir la partícula al contenedor
+						particlesContainer.appendChild(particle);
+					}
+				}
+				
+				/**
+				 * ANIMACIÓN DE SCROLL EN ESPIRAL
+				 * Configura las secciones para animarse cuando entran en el viewport
+				 */
+				
+				// Seleccionar todas las secciones del documento
+				const sections = document.querySelectorAll('section');
+				
+				// Añadir la clase base para animación a cada sección
+				sections.forEach(section => {
+					section.classList.add('section-animated');
+				});
+				
+				/**
+				 * Configurar el Intersection Observer
+				 * Este API observa cuando elementos entran/salen del viewport
+				 */
+				const observer = new IntersectionObserver((entries) => {
+					// Por cada entrada (sección) que cambia de estado visible/no visible
+					entries.forEach(entry => {
+						if (entry.isIntersecting) {
+							// Si la sección está en el viewport, añadir clase visible
+							entry.target.classList.add('visible');
+						} else {
+							// Si la sección sale del viewport, quitar clase visible
+							entry.target.classList.remove('visible');
+						}
+					});
+				}, { threshold: 0.1 }); // Umbral: activar cuando al menos el 10% de la sección es visible
+				
+				// Comenzar a observar cada sección
+				sections.forEach(section => {
+					observer.observe(section);
+				});
+			});
+		</script>
+		</div> <!-- Cierre del div "content" -->
+	</body>
+</html>
